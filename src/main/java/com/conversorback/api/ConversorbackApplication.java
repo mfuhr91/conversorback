@@ -1,9 +1,5 @@
 package com.conversorback.api;
 
-
-
-import com.conversorback.api.services.GetRequestBitso;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -14,9 +10,6 @@ public class ConversorbackApplication {
 		SpringApplication.run(ConversorbackApplication.class, args);
 
 		try {
-			//JsoupHtml.obtenerEuro();
-			
-			System.out.println(GetRequestBitso.getRequest());
 			
 		} catch (Exception e) {
 			e.printStackTrace();

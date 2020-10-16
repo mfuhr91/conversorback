@@ -3,7 +3,7 @@ package com.conversorback.api.model;
 import java.util.List;
 
 import lombok.Data;
-
+// CLASE DE MAPEO JSON DESDE https://api.bitso.com/v3/trades/?book=btc_ars
 @Data
 public class Respuesta {
     private Boolean success;

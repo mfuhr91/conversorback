@@ -9,9 +9,18 @@ public interface IMonedaService {
 
     public String agregarMoneda(String tipo);
 
-    public String eliminarMonedaPorId(Integer id);
+    public String eliminarMonedaPorId(Long id);
 
-    public Moneda buscarMonedaPorId(Integer id);
+    public Moneda buscarMonedaPorId(Long id);
 
+    public void guardarCotizacionAuto();
+
+    public void borrarMasAntiguo();
+
+    public String guardarEuro();
+
+    public String guardarBitcoin();
+
+    public List<Moneda> buscarUltimosRegistro();
 
 }
