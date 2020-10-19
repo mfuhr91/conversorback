@@ -18,7 +18,7 @@
 	<properties>
 		
 		
-		<java.version>11</java.version>
+		<java.version>1.8</java.version>
 	</properties> 
 	
 	
@@ -72,14 +72,6 @@
 			<artifactId>spring-boot-starter-mail</artifactId>
 		 </dependency>
 		 
-		 
-		 <!-- ================= HEROKU =================== -->
-		<!-- https://mvnrepository.com/artifact/com.heroku.sdk/heroku-maven-plugin -->
-		<dependency>
-			<groupId>com.heroku.sdk</groupId>
-			<artifactId>heroku-maven-plugin</artifactId>
-			<version>3.0.4</version>
-		</dependency>
 
 
 	</dependencies>
