@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.conversorback</groupId>
 	<artifactId>conversorback</artifactId>
-	<version>1.0.0</version>
+	<version>1.1.0</version>
 	<name>conversorback</name>
 	<description>API REST CONVERSOR</description>
 
@@ -44,6 +44,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		
+		<!-- ================= JSON =================== -->
 		</dependency><!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
 		<dependency>
 			<groupId>org.jsoup</groupId>
@@ -59,6 +60,13 @@
 		</dependency>
 
 
+		<!-- ================= MAIL =================== -->
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		 </dependency>
+ 		
 		
 
 	</dependencies>

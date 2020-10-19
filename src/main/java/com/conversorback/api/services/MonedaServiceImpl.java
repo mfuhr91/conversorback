@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import com.conversorback.api.model.Entities.Moneda;
 import com.conversorback.api.model.Repositories.IMonedaRepository;
@@ -23,6 +22,9 @@ public class MonedaServiceImpl implements IMonedaService {
     @Autowired
     private IMonedaRepository monedaRepo;
 
+    @Autowired
+    private IMailService mailService;
+
     @Override
     public List<Moneda> listarMonedas() {
         return monedaRepo.findAll();
@@ -33,12 +35,12 @@ public class MonedaServiceImpl implements IMonedaService {
         Moneda moneda = new Moneda();
         moneda.setTipo(tipo);
         borrarMasAntiguo();
-        if(tipo.equals("euro_blue")){
+       
+         if(tipo.equals("euro_blue")){
             return guardarEuro();
         }else{
             return guardarBitcoin();
         }
-    
     }
 
     @Override
@@ -91,13 +93,31 @@ public class MonedaServiceImpl implements IMonedaService {
     public String guardarEuro() {
         Moneda moneda = new Moneda();
         try {
-            Map<String,String> euroMapa = JsoupHtml.obtenerEuro();
-            moneda.setTipo(euroMapa.get("tipo").toString());
-            Double precio = Double.parseDouble(euroMapa.get("valor").toString());
+          
+            List<String> lista = JsoupHtml.obtenerEuro();
+
+             if(lista.size() > 2){
+
+                String texto = "";
+
+                for (int i = 0; i < lista.size()-1; i++) {
+                    if(!lista.get(i).contains("200")){
+                        texto += "El estado de la página es: \n - " + lista.get(i) + "\n";
+                    }
+                }
+
+                mailService.enviarMail("mfuhr91@gmail.com", 
+                "ERROR EN SISTEMA CONVERPACK", texto);
+            
+            }
+            moneda.setTipo("euro_blue");
+            Double precio = Double.parseDouble(lista.get(lista.size()-1).toString());
             moneda.setValor(precio);
         } catch (IOException e) {
             return "No se pudo guardar el euro blue";
         }
+        
+        
         if(moneda.getValor() != 0.0){
 
             monedaRepo.save(moneda);
@@ -112,9 +132,31 @@ public class MonedaServiceImpl implements IMonedaService {
     public String guardarBitcoin() {
         Moneda moneda = new Moneda();
         try {
-            Map<String,String> bitcoinMapa = GetRequestBitso.getRequest();
-            moneda.setTipo(bitcoinMapa.get("tipo").toString());
-            Double precio = Double.parseDouble(bitcoinMapa.get("valor").toString());
+
+            List<String> lista = GetRequestBitso.getRequest();
+
+            if(lista.size() > 1){
+
+                String texto = "";
+
+                for (int i = 0; i < lista.size()-1; i++) {
+                    if(!lista.get(i).contains("200")){
+                        texto += "El estado de la página es: \n - " + lista.get(i) + "\n";
+                    }
+                }
+
+                mailService.enviarMail("mfuhr91@gmail.com", 
+                "ERROR EN SISTEMA CONVERPACK", texto);
+            
+            }
+
+
+
+
+
+            // Map<String,String> bitcoinMapa = GetRequestBitso.getRequest();
+            moneda.setTipo("bitcoin");
+            Double precio = Double.parseDouble(lista.get(lista.size()-1).toString());
             moneda.setValor(precio);
         } catch (IOException e) {
             return "No se pudo guardar el bitcoin";

@@ -1,143 +1,200 @@
 package com.conversorback.api.utils;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jsoup.Jsoup;
 import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Document;
 
+
+
 public class JsoupHtml {
 
-    public static Map<String,String> obtenerEuro() throws IOException {
+    private static String errorEuro;
+
+    /**
+     * Con este método se comprueba el estado de cada una de las webs,
+     * y si la respuesta es 200(OK), se procede a ejecutar la lógica
+     * para obtener el valor correspondiente del euro, luego se devuelve la
+     * lista para ser enviada al servicio de Moneda
+     * 
+     * @param urls
+     * @param lista
+     * @return lista con errores si los hay, y valor del euro como ultimo item de la lista
+     */
+    public static List<String> obtenerEuro() throws IOException {
+
+        final List<String> lista = new ArrayList<>();
 
         String[] urls = {
             "https://www.oficialhoy.com.ar/p/cotizacion-euro.html",
             "https://www.paralelohoy.com.ar/p/cotizacion-euro-hoy-argentina.html",
             "https://www.precioeuroblue.com.ar",
         };
-
-        Map<String, String> euroMapa = new HashMap<>();
-        euroMapa.put("tipo", "euro_blue");
-        // Double euroVenta = 0.0;
+    
         // SI LA PÁGINA ESTA CAIDA O CAMBIÓ SU URL, NO INGRESA AL IF Y LEE LA SUGUIENTE PÁGINA
-        if (getStatusConnectionCode(urls[0]) == 200) { 
-             getPrimeraCotizacion(euroMapa, urls);
+        if (getStatusConnectionCode(urls[0], lista) == 200) { 
+             getPrimeraCotizacion(urls, lista);
             
-        } else if (getStatusConnectionCode(urls[1]) == 200){
-            
-            System.out.println("El Status Code de www.oficialhoy.com.ar no es OK, es: " + getStatusConnectionCode(urls[0]));
+        } else if (getStatusConnectionCode(urls[1], lista) == 200){
 
-            getSegundaCotizacion(euroMapa, urls); 
-        } else if (getStatusConnectionCode(urls[2]) == 200){
-            
-            System.out.println("El Status Code de www.paralelohoy.com.ar no es OK, es: " + getStatusConnectionCode(urls[1]));
-            
-            getTerceraCotizacion(euroMapa, urls); 
-        }else {
-            System.out.println("El Status Code de www.precioeuroblue.com.ar no es OK, es: " + getStatusConnectionCode(urls[2]));
-            euroMapa.put("valor", "0.0");
-            return euroMapa;
+            getSegundaCotizacion(urls, lista); 
+        } else if (getStatusConnectionCode(urls[2], lista) == 200){
+
+            getTerceraCotizacion(urls, lista); 
+        }else {              
+ 
+            lista.add("0.0");
+            return lista;
         }
-        //System.out.println(euroVenta);
-        
 
-
-        
-       
-        return euroMapa;
+        System.out.println(lista);
+          
+        return lista;
     }
 
 
-    private static void getPrimeraCotizacion(Map<String,String>  euroMapa, String[] urls){
+    /**
+     * Con este método se consigue la cotización desde la página 
+     * www.oficialhoy.com.ar, se parsea a un double, y se agruega a la
+     * lista para ser enviada al servicio de Moneda
+     * 
+     * @param urls
+     * @param lista
+     */
+    private static void getPrimeraCotizacion(String[] urls, List<String> lista){
 
         Document doc = getHtmlDocument(urls[0]);
 
-        String fila = doc.select("#websendeos tbody tr").last().text();
+        String fila = doc.select("#websendeos tbody tr").last().text(); // #websendeos tbody tr
 
         String[] result = fila.split(" ");
 
         String euro = result[3].substring(1);
 
+        Double euroVenta = 0.0;
+
         try {
-            Double euroVenta = Double.parseDouble(euro);
-
-            euroMapa.put("valor", euroVenta.toString());
-
-
+            euroVenta = Double.parseDouble(euro);
             System.out.println("VENTA OFICIALHOY.COM.AR: " + euroVenta);
         } catch (NumberFormatException e) {
+            errorEuro = " Error al obtener el valor del euro --> PÁGINA WEB: " + urls[0];
+            lista.add(errorEuro);     
+            
             // SI CAMBIÓ LA ESTRUCTURA DE LA PAGINA Y NO SE PUEDE CONVERTIR EL TEXTO A DOUBLE, SIGUE CON LA OTRA PAGINA
-            getSegundaCotizacion(euroMapa, urls); 
+            getSegundaCotizacion(urls, lista); 
             System.out.println("No se pudo leer el precio del euro de la página OFICIALHOY.COM.AR");
         }
-
-        
-    }
-
-    private static void getSegundaCotizacion(Map<String,String>  euroMapa, String[] urls){
-        Document doc = getHtmlDocument(urls[1]);
-
-        String fila = doc.select(".tabla tbody td").last().text();
-
-        String euro = fila.substring(1);
-        
-        try {
-            Double euroVenta = Double.parseDouble(euro);
-            euroMapa.put("valor", euroVenta.toString());
-            System.out.println("VENTA PARALELOHOY.COM.AR: " + euro);
-            
-        } catch (NumberFormatException e) {
-            // SI CAMBIÓ LA ESTRUCTURA DE LA PAGINA Y NO SE PUEDE CONVERTIR EL TEXTO A DOUBLE, SIGUE CON LA OTRA PAGINA
-            getTerceraCotizacion(euroMapa, urls);
-            System.out.println("No se pudo leer el precio del euro de la página PARALELOHOY.COM.AR");
+        if(!lista.get(lista.size()-1).contains("0.0")){
+            lista.add(euroVenta.toString());
         }
     }
-    
-    private static void getTerceraCotizacion(Map<String,String> euroMapa, String[] urls){
-        Document doc = getHtmlDocument(urls[2]);
 
-        String euro = doc.select(".entry span").last().text();
+
+    /**
+     * Con este método se consigue la cotización desde la página 
+     * www.paralelohoy.com.ar, se parsea a un double, y se agruega a la
+     * lista para ser enviada al servicio de Moneda
+     * 
+     * @param urls
+     * @param lista
+     */
+    private static void getSegundaCotizacion(String[] urls, List<String> lista){
+        Document doc = getHtmlDocument(urls[1]);
+
+        String fila = doc.select(".tabla tbody td").last().text(); // .tabla tbody td
+        Double euroVenta = 0.0;
 
         
+        try {
+            String euro = fila.substring(1);
+            euroVenta = Double.parseDouble(euro);
+            System.out.println("VENTA PARALELOHOY.COM.AR: " + euro);
+
+        } catch (Exception e) {
+            errorEuro = " Error al obtener el valor del euro --> PÁGINA WEB: " + urls[1];
+            lista.add(errorEuro);
+            
+            // SI CAMBIÓ LA ESTRUCTURA DE LA PAGINA Y NO SE PUEDE CONVERTIR EL TEXTO A DOUBLE, SIGUE CON LA OTRA PAGINA
+            getTerceraCotizacion(urls, lista);
+            System.out.println("No se pudo leer el precio del euro de la página PARALELOHOY.COM.AR");
+        }
+
+        if(!lista.get(lista.size()-1).contains("0.0")){
+            lista.add(euroVenta.toString());
+        }
+         
+    }
+
+    /**
+     * Con este método se consigue la cotización desde la página 
+     * www.precioeuroblue.com.ar, se parsea a un double, y se agruega a la
+     * lista para ser enviada al servicio de Moneda
+     * 
+     * @param urls
+     * @param lista
+     */
+    private static void getTerceraCotizacion(String[] urls, List<String> lista){
+        Document doc = getHtmlDocument(urls[2]);
+
+        String euro = doc.select(".entry span").last().text(); // .entry span
+
+        Double euroVenta = 0.0;
         
         try {
             Double euroParse = Double.parseDouble(euro);
 
-            Double euroVenta = (double) Math.round(euroParse);
-
-            euroMapa.put("valor", euroVenta.toString());
-
+            euroVenta = (double) Math.round(euroParse);
             System.out.println("VENTA PRECIOEUROBLUE.COM.AR: " + euroVenta);
             
         } catch (NumberFormatException e) {
-            euroMapa.put("valor", "0.0");
+
+            errorEuro = " Error al obtener el valor del euro --> PÁGINA WEB: " + urls[2];
+            lista.add(errorEuro);
             System.out.println("No se pudo leer el precio del euro de la página PRECIOEUROBLUE.COM.AR");
         }
+
+        if(!lista.get(lista.size()-1).contains("0.0")){
+            lista.add(euroVenta.toString());
+        }
+
     }
 
     /**
-     * Con esta método compruebo el Status code de la respuesta que recibo al hacer
+     * Con este método compruebo el Status code de la respuesta que recibo al hacer
      * la petición EJM: 200 OK 300 Multiple Choices 301 Moved Permanently 305 Use
      * Proxy 400 Bad Request 403 Forbidden 404 Not Found 500 Internal Server Error
      * 502 Bad Gateway 503 Service Unavailable
      * 
      * @param url
+     * @param lista
      * @return Status Code
      */
-    public static int getStatusConnectionCode(String url) {
-
+    public static Integer getStatusConnectionCode(String url , List<String> lista) {
+        
+        
         Response response = null;
 
         try {
             response = Jsoup.connect(url).userAgent("Mozilla/5.0").timeout(100000).ignoreHttpErrors(true).execute();
         } catch (IOException ex) {
             System.out.println("Excepción al obtener el Status Code: " + ex.getMessage());
+            
+            String estado = "STATUS CODE: " + 404 + " --> PÁGINA WEB: " + url;
+            lista.add(estado);
             return 404;
         }
+
+        String estado = "STATUS CODE: " + response.statusCode() + " --> PÁGINA WEB: " + url;
+
+        lista.add(estado);
+
         return response.statusCode();
     }
+
+
 
     /**
      * Con este método devuelvo un objeto de la clase Document con el contenido del

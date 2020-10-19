@@ -8,12 +8,6 @@ public class ConversorbackApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ConversorbackApplication.class, args);
-
-		try {
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 }
