@@ -71,9 +71,8 @@ public class JsoupHtml {
         Double euroVenta = 0.0;
         
         try {
-            Double euroParse = Double.parseDouble(euro);
+            euroVenta = Double.parseDouble(euro);
 
-            euroVenta = (double) Math.round(euroParse);
             System.out.println("VENTA PRECIOEUROBLUE.COM.AR: " + euroVenta);
             
         } catch (NumberFormatException e) {
