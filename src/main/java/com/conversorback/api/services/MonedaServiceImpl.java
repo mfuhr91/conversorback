@@ -56,12 +56,13 @@ public class MonedaServiceImpl implements IMonedaService {
     }
 
     @Override
-    @Scheduled(cron="0 0 0,6,12,18 * * *", zone = "America/Argentina/Ushuaia") // cron="0 0 0,6,12,18 * * *"
+    @Scheduled(cron="0 0 * * * *", zone = "America/Argentina/Ushuaia") // CRON QUE SE EJECUTA A CADA HORA
     public void guardarCotizacionAuto() {
         System.out.println("GUARDADO AUTOMATICO");
         
         guardarEuro();
         guardarBitcoin();
+        borrarMasAntiguo();
     }
 
     @Override
@@ -69,20 +70,20 @@ public class MonedaServiceImpl implements IMonedaService {
         
         List<Moneda> listaEuroBlue = monedaRepo.findByTipo("euro_blue");
         List<Moneda> listaBitcoin = monedaRepo.findByTipo("bitcoin");
-        Long unMes = 2678400000L; 
+        Long medioMes = 1296000000L; 
         Date fechaActual = new Date();
-        if(listaEuroBlue.size() > 120 ){
+        if(listaEuroBlue.size() > 360 ){
             for (Moneda moneda : listaEuroBlue) {
                 Long tiempo = fechaActual.getTime() - moneda.getFecha().getTime();
-                if(tiempo > unMes){
+                if(tiempo > medioMes){
                     monedaRepo.deleteById(moneda.getId());
                 }
             }
         }
-        if(listaBitcoin.size() > 120){
+        if(listaBitcoin.size() > 360){
             for (Moneda moneda : listaBitcoin) {
                 Long tiempo = fechaActual.getTime() - moneda.getFecha().getTime();
-                if(tiempo > unMes){
+                if(tiempo > medioMes){
                     monedaRepo.deleteById(moneda.getId());
                 }
             }
@@ -121,7 +122,7 @@ public class MonedaServiceImpl implements IMonedaService {
         if(moneda.getValor() != 0.0){
 
             monedaRepo.save(moneda);
-            borrarMasAntiguo();
+            
             return "Moneda id: " + moneda.getTipo() + " - " + moneda.getValor() + " guardado con exito";
         }else{
             return "No se guardo la moneda en la bd";
@@ -151,10 +152,6 @@ public class MonedaServiceImpl implements IMonedaService {
             }
 
 
-
-
-
-            // Map<String,String> bitcoinMapa = GetRequestBitso.getRequest();
             moneda.setTipo("bitcoin");
             Double precio = Double.parseDouble(lista.get(lista.size()-1).toString());
             moneda.setValor(precio);
@@ -164,7 +161,6 @@ public class MonedaServiceImpl implements IMonedaService {
         if(moneda.getValor() != 0.0){
 
             monedaRepo.save(moneda);
-            borrarMasAntiguo();
             return "Moneda id: " + moneda.getTipo() + " - " + moneda.getValor() + " guardado con exito";
         }else{
             return "No se guardo la moneda en la bd";
