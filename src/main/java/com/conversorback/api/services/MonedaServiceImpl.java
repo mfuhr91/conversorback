@@ -65,30 +65,6 @@ public class MonedaServiceImpl implements IMonedaService {
         borrarMasAntiguo();
     }
 
-    @Override
-    public void borrarMasAntiguo() {
-        
-        List<Moneda> listaEuroBlue = monedaRepo.findByTipo("euro_blue");
-        List<Moneda> listaBitcoin = monedaRepo.findByTipo("bitcoin");
-        Long medioMes = 1296000000L; 
-        Date fechaActual = new Date();
-        if(listaEuroBlue.size() > 360 ){
-            for (Moneda moneda : listaEuroBlue) {
-                Long tiempo = fechaActual.getTime() - moneda.getFecha().getTime();
-                if(tiempo > medioMes){
-                    monedaRepo.deleteById(moneda.getId());
-                }
-            }
-        }
-        if(listaBitcoin.size() > 360){
-            for (Moneda moneda : listaBitcoin) {
-                Long tiempo = fechaActual.getTime() - moneda.getFecha().getTime();
-                if(tiempo > medioMes){
-                    monedaRepo.deleteById(moneda.getId());
-                }
-            }
-        }
-    }
 
     @Override
     public String guardarEuro() {
@@ -122,7 +98,6 @@ public class MonedaServiceImpl implements IMonedaService {
         if(moneda.getValor() != 0.0){
 
             monedaRepo.save(moneda);
-            
             return "Moneda id: " + moneda.getTipo() + " - " + moneda.getValor() + " guardado con exito";
         }else{
             return "No se guardo la moneda en la bd";
@@ -135,19 +110,16 @@ public class MonedaServiceImpl implements IMonedaService {
         try {
 
             List<String> lista = GetRequestBitso.getRequest();
-
             if(lista.size() > 1){
-
                 String texto = "";
-
                 for (int i = 0; i < lista.size()-1; i++) {
                     if(!lista.get(i).contains("200")){
-                        texto += "El estado de la página es: \n - " + lista.get(i) + "\n";
+                        texto = "El estado de la página es: \n - " + lista.get(i) + "\n";
                     }
                 }
-
                 mailService.enviarMail("mfuhr91@gmail.com", 
                 "ERROR EN SISTEMA CONVERPACK", texto);
+
             
             }
 
@@ -164,6 +136,31 @@ public class MonedaServiceImpl implements IMonedaService {
             return "Moneda id: " + moneda.getTipo() + " - " + moneda.getValor() + " guardado con exito";
         }else{
             return "No se guardo la moneda en la bd";
+        }
+    }
+
+    @Override
+    public void borrarMasAntiguo() {
+        
+        List<Moneda> listaEuroBlue = monedaRepo.findByTipo("euro_blue");
+        List<Moneda> listaBitcoin = monedaRepo.findByTipo("bitcoin");
+        Long medioMes = 1296000000L; 
+        Date fechaActual = new Date();
+        if(listaEuroBlue.size() > 360 ){
+            for (Moneda moneda : listaEuroBlue) {
+                Long tiempo = fechaActual.getTime() - moneda.getFecha().getTime();
+                if(tiempo > medioMes){
+                    monedaRepo.deleteById(moneda.getId());
+                }
+            }
+        }
+        if(listaBitcoin.size() > 360){
+            for (Moneda moneda : listaBitcoin) {
+                Long tiempo = fechaActual.getTime() - moneda.getFecha().getTime();
+                if(tiempo > medioMes){
+                    monedaRepo.deleteById(moneda.getId());
+                }
+            }
         }
     }
     

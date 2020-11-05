@@ -35,7 +35,7 @@ public class GetRequestBitso {
     public static List<String> getRequest() throws IOException {
         Book ultimo = null; 
         final List<String> lista = new ArrayList<>();
-        if(getStatusConnectionCode(lista) == 200){
+        if(getStatusConnectionCode(lista) == 200 ){
             HttpClient client = HttpClient.newHttpClient();
             HttpResponse<String> response = null;
             HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://api.bitso.com/v3/trades/?book=btc_ars"))
@@ -70,7 +70,7 @@ public class GetRequestBitso {
                         }
                     }
                 }    
-                //System.out.println("ULTIMO VALOR COMPRA BITCOIN: "+ultimo); 
+                //System.out.println("ULTIMO VALOR COMPRA BITCOIN: "+ultimo);
                
 
                lista.add(ultimo.getPrice().toString());
@@ -107,7 +107,7 @@ public class GetRequestBitso {
     public static int getStatusConnectionCode(List<String> lista) throws IOException {
         URL url = null;
         int code = 0;
-        
+                
         try {
             url = new URL("https://api.bitso.com/v3/trades/?book=btc_ars");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -120,6 +120,8 @@ public class GetRequestBitso {
             String estado = "El servidor no responde --> SERVIDOR: " + url;
             lista.add(estado);
             e.printStackTrace();
+            
+            
         }
 
         return code;
