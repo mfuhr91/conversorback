@@ -55,6 +55,7 @@ public class MonedaServiceImpl implements IMonedaService {
         return monedaRepo.findById(id).orElse(null);
     }
 
+    
     @Override
     @Scheduled(cron="0 0 * * * *", zone = "America/Argentina/Ushuaia") // CRON QUE SE EJECUTA A CADA HORA
     public void guardarCotizacionAuto() {
@@ -62,7 +63,7 @@ public class MonedaServiceImpl implements IMonedaService {
         
         guardarEuro();
         guardarBitcoin();
-        borrarMasAntiguo();
+        borrarMasAntiguo(); 
     }
 
 

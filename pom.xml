@@ -16,7 +16,7 @@
 
 
 	<properties>
-		<java.version>1.8</java.version>
+		<java.version>1.8</java.version> <!-- TODO: CAMBIAR A 1.8 -->
 	</properties> 
 	
 	
