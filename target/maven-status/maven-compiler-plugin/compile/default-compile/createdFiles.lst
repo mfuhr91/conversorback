@@ -1,0 +1,12 @@
+com/conversorback/api/model/Entities/Moneda.class
+com/conversorback/api/services/IMonedaService.class
+com/conversorback/api/model/Book.class
+com/conversorback/api/utils/JsoupHtml.class
+com/conversorback/api/services/MailServiceImpl.class
+com/conversorback/api/utils/GetRequestBitso.class
+com/conversorback/api/services/IMailService.class
+com/conversorback/api/Controllers/MonedaController.class
+com/conversorback/api/model/Repositories/IMonedaRepository.class
+com/conversorback/api/services/MonedaServiceImpl.class
+com/conversorback/api/model/Respuesta.class
+com/conversorback/api/ConversorbackApplication.class
