@@ -87,6 +87,42 @@ public class JsoupHtml {
         }
 
     }
+    
+    /**
+     * Con este método se consigue la cotización desde la página 
+     * www.oficialhoy.com.ar, se parsea a un double, y se agruega a la
+     * lista para ser enviada al servicio de Moneda
+     * 
+     * @param urls
+     * @param lista
+     */
+    private static void getSegundaCotizacion(String[] urls, List<String> lista){
+        
+        Document doc = getHtmlDocument(urls[1]);
+        
+        String fila = doc.select("#websendeos tbody tr").last().text(); // #websendeos tbody tr
+
+        String[] result = fila.split(" ");
+        
+        String euro = result[3].substring(1);
+        
+        Double euroVenta = 0.0;
+        
+        try {
+            euroVenta = Double.parseDouble(euro);
+            System.out.println("VENTA OFICIALHOY.COM.AR: " + euroVenta);
+        } catch (NumberFormatException e) {
+            errorEuro = " Error al obtener el valor del euro --> PÁGINA WEB: " + urls[1];
+            lista.add(errorEuro);     
+            
+            // SI CAMBIÓ LA ESTRUCTURA DE LA PAGINA Y NO SE PUEDE CONVERTIR EL TEXTO A DOUBLE, SIGUE CON LA OTRA PAGINA
+            getSegundaCotizacion(urls, lista); 
+            System.out.println("No se pudo leer el precio del euro de la página OFICIALHOY.COM.AR");
+        }
+        if(!lista.get(lista.size()-1).contains("0.0")){
+            lista.add(euroVenta.toString());
+        }
+    }
 
     /**
      * Con este método se consigue la cotización desde la página 
@@ -96,10 +132,14 @@ public class JsoupHtml {
      * @param urls
      * @param lista
      */
-    private static void getSegundaCotizacion(String[] urls, List<String> lista){
-        Document doc = getHtmlDocument(urls[1]);
-
-        String fila = doc.select(".tabla tbody td").last().text(); // .tabla tbody td
+    private static void getTerceraCotizacion(String[] urls, List<String> lista){
+        Document doc = getHtmlDocument(urls[2]);
+        String fila = "";
+        try{
+            fila = doc.select(".tabla tbody td").last().text(); // .tabla tbody td
+        }catch(NullPointerException e){
+            System.out.println(e);
+        }
         Double euroVenta = 0.0;
 
         
@@ -109,7 +149,7 @@ public class JsoupHtml {
             System.out.println("VENTA PARALELOHOY.COM.AR: " + euro);
 
         } catch (Exception e) {
-            errorEuro = " Error al obtener el valor del euro --> PÁGINA WEB: " + urls[1];
+            errorEuro = " Error al obtener el valor del euro --> PÁGINA WEB: " + urls[2];
             lista.add(errorEuro);
             
             // SI CAMBIÓ LA ESTRUCTURA DE LA PAGINA Y NO SE PUEDE CONVERTIR EL TEXTO A DOUBLE, SIGUE CON LA OTRA PAGINA
@@ -121,42 +161,6 @@ public class JsoupHtml {
             lista.add(euroVenta.toString());
         }
          
-    }
-
-    /**
-     * Con este método se consigue la cotización desde la página 
-     * www.oficialhoy.com.ar, se parsea a un double, y se agruega a la
-     * lista para ser enviada al servicio de Moneda
-     * 
-     * @param urls
-     * @param lista
-     */
-    private static void getTerceraCotizacion(String[] urls, List<String> lista){
-
-        Document doc = getHtmlDocument(urls[2]);
-
-        String fila = doc.select("#websendeos tbody tr").last().text(); // #websendeos tbody tr
-
-        String[] result = fila.split(" ");
-
-        String euro = result[3].substring(1);
-
-        Double euroVenta = 0.0;
-
-        try {
-            euroVenta = Double.parseDouble(euro);
-            System.out.println("VENTA OFICIALHOY.COM.AR: " + euroVenta);
-        } catch (NumberFormatException e) {
-            errorEuro = " Error al obtener el valor del euro --> PÁGINA WEB: " + urls[2];
-            lista.add(errorEuro);     
-            
-            // SI CAMBIÓ LA ESTRUCTURA DE LA PAGINA Y NO SE PUEDE CONVERTIR EL TEXTO A DOUBLE, SIGUE CON LA OTRA PAGINA
-            getSegundaCotizacion(urls, lista); 
-            System.out.println("No se pudo leer el precio del euro de la página OFICIALHOY.COM.AR");
-        }
-        if(!lista.get(lista.size()-1).contains("0.0")){
-            lista.add(euroVenta.toString());
-        }
     }
 
     /**

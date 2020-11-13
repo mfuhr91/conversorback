@@ -28,13 +28,15 @@ public class MonedaController {
         return monedaService.listarMonedas();
     }
 
-    /* 
-    @PostMapping("/agregar")
+    
+    /*
+     @PostMapping("/agregar")
     public String agregar(@RequestParam String tipo){
         System.out.println("################### moneda guardada!");
         return monedaService.agregarMoneda(tipo);
-    } 
+    }  
     */
+    
 
     @GetMapping("/buscar/{id}")
     public Moneda buscarPorId(@PathVariable Long id){
