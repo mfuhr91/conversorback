@@ -12,6 +12,11 @@ spring:
         username: b4b639b34a044a
         password: 9839a811
         driver-class-name: com.mysql.cj.jdbc.Driver
+        tomcat:
+            testOnBorrow: true
+            validation-query: SELECT 1
+        hikari:
+            max-lifetime: 300000
 
     jpa:
         database-platform: org.hibernate.dialect.MySQL8Dialect
