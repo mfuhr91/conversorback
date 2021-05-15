@@ -1,1 +1,1 @@
-web: java -jar target/conversorback-1.1.5.jar
+web: java -jar target/conversorback-1.2.jar
