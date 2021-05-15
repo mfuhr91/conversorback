@@ -1,0 +1,13 @@
+/Users/marianofuhr/proyectos/conversor-bitcoin/conversorback/src/main/java/com/conversorback/api/services/MonedaServiceImpl.java
+/Users/marianofuhr/proyectos/conversor-bitcoin/conversorback/src/main/java/com/conversorback/api/model/Entities/Moneda.java
+/Users/marianofuhr/proyectos/conversor-bitcoin/conversorback/src/main/java/com/conversorback/api/model/Repositories/IMonedaRepository.java
+/Users/marianofuhr/proyectos/conversor-bitcoin/conversorback/src/main/java/com/conversorback/api/services/IMailService.java
+/Users/marianofuhr/proyectos/conversor-bitcoin/conversorback/src/main/java/com/conversorback/api/model/Book.java
+/Users/marianofuhr/proyectos/conversor-bitcoin/conversorback/src/main/java/com/conversorback/api/utils/GetRequestBitso.java
+/Users/marianofuhr/proyectos/conversor-bitcoin/conversorback/src/main/java/com/conversorback/api/services/IMonedaService.java
+/Users/marianofuhr/proyectos/conversor-bitcoin/conversorback/src/main/java/com/conversorback/api/utils/PaginaWeb.java
+/Users/marianofuhr/proyectos/conversor-bitcoin/conversorback/src/main/java/com/conversorback/api/Controllers/MonedaController.java
+/Users/marianofuhr/proyectos/conversor-bitcoin/conversorback/src/main/java/com/conversorback/api/model/Respuesta.java
+/Users/marianofuhr/proyectos/conversor-bitcoin/conversorback/src/main/java/com/conversorback/api/ConversorbackApplication.java
+/Users/marianofuhr/proyectos/conversor-bitcoin/conversorback/src/main/java/com/conversorback/api/services/MailServiceImpl.java
+/Users/marianofuhr/proyectos/conversor-bitcoin/conversorback/src/main/java/com/conversorback/api/utils/JsoupHtml.java
