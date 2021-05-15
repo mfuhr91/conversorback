@@ -1,5 +1,7 @@
 package com.conversorback.api.Controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,12 +20,15 @@ import com.conversorback.api.services.IMonedaService;
 @RequestMapping("/api/moneda")
 public class MonedaController {
 
+    Logger log = LoggerFactory.getLogger(MonedaController.class);
+
     @Autowired
     private IMonedaService monedaService;
 
     @GetMapping("")
     public List<Moneda> listar(){
-        System.out.println("################### monedas listadas!");
+
+        log.info("MONEDAS LISTADAS CORRECTAMENTE");
         
         return monedaService.listarMonedas();
     }
@@ -40,20 +45,25 @@ public class MonedaController {
 
     @GetMapping("/buscar/{id}")
     public Moneda buscarPorId(@PathVariable Long id){
-        System.out.println("################### moneda encontrada!");
+
+        log.info("MONEDAS ENCONTRADA CORRECTAMENTE!");
+       
         return monedaService.buscarMonedaPorId(id);
     }
 
     @DeleteMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Long id){
-        System.out.println("################### monedas eliminada!");
+
+        log.info("MONEDAS ELIMINADA CORRECTAMENTE!");
         
         return monedaService.eliminarMonedaPorId(id);
     }
 
     @GetMapping("/listarUltimos")
     public List<Moneda> listarUltimos(){
-        System.out.println("################### monedas listadas!");
+
+        log.info("ULTIMAS COTIZACIONES LISTADAS CORRECTAMENTE!");
+
         return monedaService.buscarUltimosRegistro();
     }
 
