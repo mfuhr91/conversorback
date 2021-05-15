@@ -9,9 +9,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Date;
-
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 
 import com.conversorback.api.model.Book;
 import com.conversorback.api.model.Respuesta;
@@ -19,8 +19,15 @@ import com.conversorback.api.model.Respuesta;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class GetRequestBitso {
 
+    static Logger log = LoggerFactory.getLogger(JsoupHtml.class);
+    
+    static final List<Map<String, String>> lista = new ArrayList<Map<String, String>>();
+    
     
     /**
      * Con este método se comprueba el estado del servidor API REST externo,
@@ -32,10 +39,11 @@ public class GetRequestBitso {
      * @param lista
      * @return lista con errores si los hay, y valor del bitcoin como ultimo item de la lista
      */
-    public static List<String> getRequest() throws IOException {
+    public static List<Map<String, String>> getRequest() throws IOException {
+        Map<String, String> mapa = new HashMap<String, String>();
         Book ultimo = null; 
-        final List<String> lista = new ArrayList<>();
-        if(getStatusConnectionCode(lista) == 200 ){
+        //final List<String> lista = new ArrayList<>();
+        if(getStatusConnectionCode() == 200 ){
             HttpClient client = HttpClient.newHttpClient();
             HttpResponse<String> response = null;
             HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://api.bitso.com/v3/trades/?book=btc_ars"))
@@ -46,8 +54,10 @@ public class GetRequestBitso {
             } catch (IOException | InterruptedException e) {
 
                 String estado = "No se pudo leer la API REST --> SERVIDOR: https://api.bitso.com/v3/trades/?book=btc_ars";
+                log.error(estado);
+                mapa.put("estado", estado);
 
-                lista.add(estado);
+                lista.add(mapa);
             }    
             
             // CAMBIA LA ESTRATEGIA DE NOMBRES DE ATRIBUTOS A SNAKE_CASE
@@ -70,27 +80,27 @@ public class GetRequestBitso {
                         }
                     }
                 }    
-                //System.out.println("ULTIMO VALOR COMPRA BITCOIN: "+ultimo);
                
+                mapa.put("precio", ultimo.getPrice().toString());
 
-               lista.add(ultimo.getPrice().toString());
+                lista.add(mapa);
 
             } catch (Exception e) {
                 String estado = "No se pudo mappear el bitcoin al objeto JAVA";
-                lista.add(estado);
-                lista.add("0.0");
-                return lista;
-                
+
+                log.error(estado);
+
+                mapa.put("estado", estado);
+
+                lista.add(mapa);
             }
         }else{
 
-            lista.add("0.0");
-            
-            return lista;
+            log.error("No se pudo leer la API REST --> SERVIDOR: https://api.bitso.com/v3/trades/?book=btc_ars");
+            mapa.put("error", "No se pudo leer la API REST --> SERVIDOR: https://api.bitso.com/v3/trades/?book=btc_ars");
+            lista.add(mapa);
         }
         
-        
-
         return lista;
     }
 
@@ -104,7 +114,8 @@ public class GetRequestBitso {
      * @return Status Code
      * @throws IOException
      */
-    public static int getStatusConnectionCode(List<String> lista) throws IOException {
+    public static int getStatusConnectionCode() throws IOException {
+        Map<String, String> mapa = new HashMap<String, String>();
         URL url = null;
         int code = 0;
                 
@@ -113,12 +124,16 @@ public class GetRequestBitso {
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.connect();
-
             code = connection.getResponseCode();
+            log.info("Conectado al servidor " + url + " con código: " + code);
         } catch (Exception e) {
             
             String estado = "El servidor no responde --> SERVIDOR: " + url;
-            lista.add(estado);
+            log.error("El servidor no responde --> SERVIDOR: " + url + " ERROR: " + e);
+            mapa.put("estado", estado);
+
+            lista.add(mapa);
+
             e.printStackTrace();
             
             

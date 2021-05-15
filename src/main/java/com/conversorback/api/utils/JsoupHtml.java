@@ -2,17 +2,25 @@ package com.conversorback.api.utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 
 import org.jsoup.Jsoup;
 import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 
 public class JsoupHtml {
 
-    private static String errorEuro;
+    static Logger log = LoggerFactory.getLogger(JsoupHtml.class);
+
+    private static String error;
+    static List<Map<String, String>> lista = new ArrayList<Map<String, String>>();
 
     /**
      * Con este método se comprueba el estado de cada una de las webs,
@@ -24,143 +32,149 @@ public class JsoupHtml {
      * @param lista
      * @return lista con errores si los hay, y valor del euro como ultimo item de la lista
      */
-    public static List<String> obtenerEuro() throws IOException {
+    public static List<Map<String, String>> obtenerEuro() throws IOException {  
 
-        final List<String> lista = new ArrayList<>();
+        List<Map<String, String>> result = new ArrayList<Map<String, String>>();
+        
+        Boolean hayPrecio = false;
+        for(PaginaWeb pagina : PaginaWeb.values()){
+            if(hayPrecio) {
+                break;
+            }
+            // SI LA PÁGINA ESTA CAIDA O CAMBIÓ SU URL, NO INGRESA AL IF Y LEE LA SIGUIENTE PÁGINA
+            if( getStatusConnectionCode( pagina.getUrl() ) == 200 ) {
+                lista = getCotizacion(pagina.getUrl());
 
-        String[] urls = {
-            "https://www.precioeuroblue.com.ar",
-            "https://www.oficialhoy.com.ar/p/cotizacion-euro.html",
-            "https://www.paralelohoy.com.ar/p/cotizacion-euro-hoy-argentina.html",
-        };
-    
-        // SI LA PÁGINA ESTA CAIDA O CAMBIÓ SU URL, NO INGRESA AL IF Y LEE LA SUGUIENTE PÁGINA
-        if (getStatusConnectionCode(urls[0], lista) == 200) { 
-             getPrimeraCotizacion(urls, lista);
-            
-        } else if (getStatusConnectionCode(urls[1], lista) == 200){
+                for( Map<String, String> mapa : lista){
+                    if(mapa.containsKey("estado") && !mapa.get("estado").contains("200")){
+                        result.add(mapa);
+                    }
+                    if(mapa.containsKey("error")){
+                        result.add(mapa);
+                    }
+                    if(mapa.containsKey("precio")){
+                        result.add(mapa);
+                        hayPrecio = true;
+                        break;
+                    }
+                }
+            } else {
+                result = lista;
+            }
 
-            getSegundaCotizacion(urls, lista); 
-        } else if (getStatusConnectionCode(urls[2], lista) == 200){
-
-            getTerceraCotizacion(urls, lista); 
-        }else {              
- 
-            lista.add("0.0");
-            return lista;
         }
-
-        System.out.println(lista);
           
-        return lista;
+        return result;
     }
 
     /**
-     * Con este método se consigue la cotización desde la página 
-     * www.precioeuroblue.com.ar, se parsea a un double, y se agruega a la
+     * Con este método se consigue la cotización desde las distintas páginas,
+     *  se parsea a un double, y se agrega a la
      * lista para ser enviada al servicio de Moneda
      * 
      * @param urls
      * @param lista
      */
-    private static void getPrimeraCotizacion(String[] urls, List<String> lista){
-        Document doc = getHtmlDocument(urls[0]);
+    private static List<Map<String, String>> getCotizacion(String url){
 
-        String euro = doc.select(".entry span").last().text(); // .entry span
-
-        Double euroVenta = 0.0;
+        Map<String, String> mapa = new HashMap<String, String>();
         
-        try {
-            euroVenta = Double.parseDouble(euro);
-
-            System.out.println("VENTA PRECIOEUROBLUE.COM.AR: " + euroVenta);
-            
-        } catch (NumberFormatException e) {
-
-            errorEuro = " Error al obtener el valor del euro --> PÁGINA WEB: " + urls[0];
-            lista.add(errorEuro);
-            System.out.println("No se pudo leer el precio del euro de la página PRECIOEUROBLUE.COM.AR");
-        }
-
-        if(!lista.get(lista.size()-1).contains("0.0")){
-            lista.add(euroVenta.toString());
-        }
-
-    }
-    
-    /**
-     * Con este método se consigue la cotización desde la página 
-     * www.oficialhoy.com.ar, se parsea a un double, y se agruega a la
-     * lista para ser enviada al servicio de Moneda
-     * 
-     * @param urls
-     * @param lista
-     */
-    private static void getSegundaCotizacion(String[] urls, List<String> lista){
-        
-        Document doc = getHtmlDocument(urls[1]);
-        
-        String fila = doc.select("#websendeos tbody tr").last().text(); // #websendeos tbody tr
-
-        String[] result = fila.split(" ");
-        
-        String euro = result[3].substring(1);
-        
-        Double euroVenta = 0.0;
-        
-        try {
-            euroVenta = Double.parseDouble(euro);
-            System.out.println("VENTA OFICIALHOY.COM.AR: " + euroVenta);
-        } catch (NumberFormatException e) {
-            errorEuro = " Error al obtener el valor del euro --> PÁGINA WEB: " + urls[1];
-            lista.add(errorEuro);     
-            
-            // SI CAMBIÓ LA ESTRUCTURA DE LA PAGINA Y NO SE PUEDE CONVERTIR EL TEXTO A DOUBLE, SIGUE CON LA OTRA PAGINA
-            getSegundaCotizacion(urls, lista); 
-            System.out.println("No se pudo leer el precio del euro de la página OFICIALHOY.COM.AR");
-        }
-        if(!lista.get(lista.size()-1).contains("0.0")){
-            lista.add(euroVenta.toString());
-        }
-    }
-
-    /**
-     * Con este método se consigue la cotización desde la página 
-     * www.paralelohoy.com.ar, se parsea a un double, y se agruega a la
-     * lista para ser enviada al servicio de Moneda
-     * 
-     * @param urls
-     * @param lista
-     */
-    private static void getTerceraCotizacion(String[] urls, List<String> lista){
-        Document doc = getHtmlDocument(urls[2]);
+        Document doc = getHtmlDocument(url);
         String fila = "";
-        try{
-            fila = doc.select(".tabla tbody td").last().text(); // .tabla tbody td
-        }catch(NullPointerException e){
-            System.out.println(e);
-        }
-        Double euroVenta = 0.0;
-
         
-        try {
-            String euro = fila.substring(1);
-            euroVenta = Double.parseDouble(euro);
-            System.out.println("VENTA PARALELOHOY.COM.AR: " + euro);
 
-        } catch (Exception e) {
-            errorEuro = " Error al obtener el valor del euro --> PÁGINA WEB: " + urls[2];
-            lista.add(errorEuro);
+        if ( url == PaginaWeb.URL1.getUrl() ){
+            try{
+                fila = doc.select(".tabla tbody td").last().text(); // .tabla tbody td
+            }catch(NullPointerException e){
+                System.out.println(e);
+            }   
             
-            // SI CAMBIÓ LA ESTRUCTURA DE LA PAGINA Y NO SE PUEDE CONVERTIR EL TEXTO A DOUBLE, SIGUE CON LA OTRA PAGINA
-            getTerceraCotizacion(urls, lista);
-            System.out.println("No se pudo leer el precio del euro de la página PARALELOHOY.COM.AR");
-        }
+            try {
+                String euro = fila.substring(1);
+              
+                log.info("VENTA " + url + ": " + euro);
+                
+                mapa.put("precio", euro);
+                lista.add(mapa);
+                return lista;
+                
+            } catch (Exception e) {
+                error = " Error al obtener el valor del euro --> PÁGINA WEB: " + url;
+                
+                mapa.put("error", error);
+                lista.add(mapa);
+                
+                
+                // SI CAMBIÓ LA ESTRUCTURA DE LA PAGINA Y NO SE PUEDE CONVERTIR EL TEXTO A DOUBLE, SIGUE CON LA OTRA PAGINA
+                log.error(error);
+                getCotizacion(url);
+            }
+             
+        } else if ( url == PaginaWeb.URL2.getUrl() ){
+          
+            try{
+                fila = doc.select(".elementor-column table").first().select("tbody td").last().text(); // .tabla tbody td
 
-        if(!lista.get(lista.size()-1).contains("0.0")){
-            lista.add(euroVenta.toString());
+                System.out.println(fila.toString());
+                
+            }catch(NullPointerException e){
+                System.out.println(e);
+            }
+            
+            try {
+                String euro = fila; 
+                log.info("VENTA " + url + ": " + euro);
+            
+                mapa.put("precio", euro);
+                lista.add(mapa);
+                return lista;
+            
+            } catch (Exception e) {
+                error = " Error al obtener el valor del euro --> PÁGINA WEB: " + url;
+                mapa.put("error", error);
+                
+                lista.add(mapa);
+                // SI CAMBIÓ LA ESTRUCTURA DE LA PAGINA Y NO SE PUEDE CONVERTIR EL TEXTO A DOUBLE, SIGUE CON LA OTRA PAGINA
+                log.error(error);
+                getCotizacion(url);
+
+            }
+            
+            lista.add(mapa);
+            return lista;
+        } else {
+           
+            try{
+                fila = doc.select(".content_reference span").last().text(); // .tabla tbody td
+            }catch(NullPointerException e){
+                System.out.println(e);
+            }
+            
+            try {
+                String euro = fila;
+               
+                log.info("VENTA " + url + ": " + euro);
+               
+                mapa.put("precio", euro);
+
+                lista.add(mapa);
+                return lista;
+
+            } catch (Exception e) {
+                error = " Error al obtener el valor del euro --> PÁGINA WEB: " + url;
+                mapa.put("error", error);
+                
+                log.error(error);
+                
+                lista.add(mapa);
+                return lista;
+            }   
+           
         }
-         
+        mapa.put("error", "No se pudo leer el precio del euro de ninguna página web");
+        lista.add(mapa);
+        return lista;
     }
 
     /**
@@ -173,24 +187,29 @@ public class JsoupHtml {
      * @param lista
      * @return Status Code
      */
-    public static Integer getStatusConnectionCode(String url , List<String> lista) {
-        
+    public static Integer getStatusConnectionCode(String url) {
+
+        Map<String, String> mapa = new HashMap<String, String>();
         
         Response response = null;
 
         try {
             response = Jsoup.connect(url).userAgent("Mozilla/5.0").timeout(100000).ignoreHttpErrors(true).execute();
         } catch (IOException ex) {
-            System.out.println("Excepción al obtener el Status Code: " + ex.getMessage());
-            
+
             String estado = "STATUS CODE: " + 404 + " --> PÁGINA WEB: " + url;
-            lista.add(estado);
+            log.error(estado);
+           
+            mapa.put("estado", estado);
+            lista.add(mapa);
+
             return 404;
         }
 
         String estado = "STATUS CODE: " + response.statusCode() + " --> PÁGINA WEB: " + url;
 
-        lista.add(estado);
+        mapa.put("estado", estado);
+        lista.add(mapa);
 
         return response.statusCode();
     }
@@ -211,7 +230,7 @@ public class JsoupHtml {
         try {
             doc = Jsoup.connect(url).userAgent("Mozilla/5.0").timeout(100000).get();
         } catch (IOException ex) {
-            System.out.println("Excepción al obtener el HTML de la página" + ex.getMessage());
+            log.error("Excepción al obtener el HTML de la página" + ex.getMessage());
         }
         return doc;
     }
