@@ -34,3 +34,4 @@ build/
 
 src/main/resources/application.yml.prod
 **.DS_Store*
+**aplication.yml*
