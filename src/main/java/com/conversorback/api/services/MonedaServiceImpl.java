@@ -62,8 +62,7 @@ public class MonedaServiceImpl implements IMonedaService {
 
     
     @Override
-    //@Scheduled(cron="0 0 * * * *", zone = "America/Argentina/Ushuaia") // CRON QUE SE EJECUTA A CADA HORA
-    @Scheduled(cron="*/5 * * * * *", zone = "America/Argentina/Ushuaia") // CRON QUE SE EJECUTA A CADA HORA
+    @Scheduled(cron="0 0 * * * *", zone = "America/Argentina/Ushuaia") // CRON QUE SE EJECUTA A CADA HORA
     public void guardarCotizacionAuto() {
         System.out.println("GUARDADO AUTOMATICO");
         
