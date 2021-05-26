@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.conversorback</groupId>
 	<artifactId>conversorback</artifactId>
-	<version>1.3</version>
+	<version>1.4</version>
 	<name>conversorback</name>
 	<description>API REST CONVERSOR</description>
 

@@ -65,17 +65,21 @@ public class GetRequestBitso {
                     
             try {
                 Respuesta respuesta = mapper.readValue(response.body(), Respuesta.class);
-                List<Book> books = respuesta.getPayload();
-                Date fechaActual = new Date();
+                List<Book> books = respuesta.getPayload();                Date fechaActual = new Date();
                 
+                boolean hayUltimo = false;
                 for (Book book : books) {
                    // System.out.println(book); 
-                    
+                    if(hayUltimo){
+                        break;
+                    }
                     ultimo = book;
                     for (Book book2 : books){
                         if(fechaActual.getTime() - ultimo.getCreatedAt().getTime() >= fechaActual.getTime() - book2.getCreatedAt().getTime()){
                             if(book2.getMakerSide().equals("buy")){
                                 ultimo = book2;
+                                hayUltimo = true;
+                                break;
                             }
                         }
                     }
